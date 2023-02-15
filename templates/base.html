@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% with messages = get_flashed_messages(category_filter=["info"]) %}
+        {% if messages %}
+            {% for message in messages %}
+            <p class="info"> {{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% with messages = get_flashed_messages(category_filter=["success"]) %}
+        {% if messages %}
+            {% for message in messages %}
+            <p class="success"> {{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% with messages = get_flashed_messages(category_filter=["error"]) %}
+        {% if messages %}
+            {% for message in messages %}
+            <p class="error"> {{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% macro render_input(name, placeholder, value, type="text") %}
+            <p> <input name="{{ name }}" type="{{ type }}", value="{{ value }}", placeholder="{{ placeholder }}"></p>
+    {% endmacro %}
+
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

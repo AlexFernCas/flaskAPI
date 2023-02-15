@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %} Add Recipe {% endblock %}
+{% block content%}
+        <form method="post" method="{{ url_for('add_recipe') }}">
+            <label for="recipe-name">Nombre de la Receta:</label>
+            <input type="text" id="recipe-name" name="recipe-name"><br><br>
+
+            <label for="duration">Tiempo de Duración:</label>
+            <input type="text" id="duration" name="duration"><br><br>
+
+            <label for="difficulty">Nivel de Dificultad:</label>
+            <select id="difficulty" name="difficulty">
+                <option value="fácil">Fácil</option>
+                <option value="intermedio">Intermedio</option>
+                <option value="difícil">Difícil</option>
+            </select><br><br>
+
+            <label for="ingredient">Ingredientes:</label>
+            <input type="text" id="ingredient" name="ingredient"><br><br>
+
+            <input type="button" value="Agregar Ingrediente" onclick="addIngredient()"><br><br>
+
+            <div id="ingredients-list">
+            <!-- Los ingredientes agregados se mostrarán aquí -->
+            </div>
+            <input type="submit" value="Enviar">
+            <a href="home">
+                <input type="button" value="Menu">
+            </a>
+        </form>
+        <script>
+             function addIngredient() {
+                 // Obtener el valor del ingrediente del input
+                 var ingredient = document.getElementById("ingredient").value;
+
+                 // Crear un nuevo elemento div para mostrar el ingrediente
+                 var newIngredient = document.createElement("div");
+                 newIngredient.innerHTML = ingredient;
+
+                 // Agregar el nuevo ingrediente a la lista
+                 document.getElementById("ingredients-list").appendChild(newIngredient);
+
+                 // Limpiar el valor del input
+                 document.getElementById("ingredient").value = "";
+             }
+        </script>
+{% endblock %}

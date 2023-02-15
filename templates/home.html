@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %} Home {% endblock %}
+{% block content%}
+
+    <a href="addRecipe">
+        <input name="add_recipe" value="Add recipe" type="button">
+    </a>
+    <a href="searchRecipe">
+        <input name="search_recipe" value="Search recipe" type="button">
+    </a>
+    <a href="modifyRecipe">
+        <input name="modify_recipe" value="Modify recipe" type="button">
+    </a>
+    <p>
+        <a href="logout">
+        <input name="logout" value="Log out" type="button">
+    </a>
+    </p>
+{% endblock%}
