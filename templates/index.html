@@ -1,11 +1,16 @@
-{% extends "base.html" %}
-{% block title %} Home {% endblock %}
-{% block content%}
-    <h1> Welcome to the recipes APP</h1>
-    <a href="login">
-        {{ render_input("login", "login", "Log In", "button") }}
-    </a>
-    <a href="signup">
-        {{ render_input("signup", "signup", "Sign Up", "button") }}
-    </a>
-{%  endblock %}}
+<div class="background-image">
+  <div class="overlay"></div>
+    {% extends "base.html" %}
+    {% block title %} Home {% endblock %}
+    {% block content%}
+    <div class="textbox-container">
+        <h1> Welcome to the recipes store</h1>
+        <a href="login">
+            {{ render_input("login", "login", "Log In", "button") }}
+        </a>
+        <a href="signup">
+            {{ render_input("signup", "signup", "Sign Up", "button") }}
+        </a>
+    </div>
+    {%  endblock %}
+</div>

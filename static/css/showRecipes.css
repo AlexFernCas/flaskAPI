@@ -1,0 +1,33 @@
+.background-image {
+        position: relative;
+        background-image: url('../images/comidaSaludable.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        width: 100%;
+        height: 100vh;
+        text-align: center;
+}
+.recipe-details {
+        margin: 0 auto;
+        width: 500px;
+        border: 1px solid black;
+        padding: 10px;
+}
+.recipe-name {
+        font-size: 18px;
+        font-weight: bold;
+}
+.recipe-duration {
+        font-size: 14px;
+}
+.recipe-difficulty {
+        font-size: 14px;
+}
+.recipe-ingredients {
+        font-size: 14px;
+        list-style-type: disc;
+}
+.recipe-user {
+        font-size: 14px;
+}

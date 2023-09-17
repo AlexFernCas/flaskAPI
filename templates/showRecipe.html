@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <title>Recipe Details</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/showRacipe.css') }}">
+  </head>
+  <body>
+    <div class="recipe-details">
+      <h2 class="recipe-name"> {{recipe.name}}</h2>
+      <p class="recipe-duration">Duration: {{recipe.duration}}</p>
+      <p class="recipe-difficulty">Difficulty: {{recipe.difficulty}}</p>
+      <ul class="recipe-ingredients">
+        <li>{{recipe.ingredients}}</li>
+      </ul>
+      <p class="recipe-user">Created by: {{recipe.user}}</p>
+    </div>
+  </body>
+</html>

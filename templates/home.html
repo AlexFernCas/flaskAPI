@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block title %} Home {% endblock %}
 {% block content%}
-
+<div class="textbox-container">
+    <h2>{{ welcome_message }}</h2>
     <a href="addRecipe">
         <input name="add_recipe" value="Add recipe" type="button">
     </a>
@@ -11,9 +12,16 @@
     <a href="modifyRecipe">
         <input name="modify_recipe" value="Modify recipe" type="button">
     </a>
+    <a href="showOwnRecipes">
+        <input name="show_userRecipe" value="Show own recipes" type="button">
+    </a>
+    <a href="showAllRecipes">
+        <input name="show_recipe" value="Show all recipes" type="button">
+    </a>
     <p>
         <a href="logout">
         <input name="logout" value="Log out" type="button">
     </a>
     </p>
+</div>
 {% endblock%}

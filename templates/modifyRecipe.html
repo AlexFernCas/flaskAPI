@@ -1,48 +1,113 @@
 {% extends "base.html" %}
 {% block title %} Modify recipe {% endblock %}
 {% block content%}
-        <form method="post" method="{{ url_for('modify_recipe') }}">
-            <label for="recipe-name">Nombre de la Receta:</label>
-            <input type="text" id="recipe-name" name="recipe-name"><br><br>
+    <div class="textbox-container">
+        <form method="post" method="{{ url_for('create_recipe') }}">
+            <div class="box">
+                <h2>Modify recipe</h2>
+                <label for="recipe-name">Recipe's name:</label>
+                <input type="text" id="recipe-name" name="recipe-name"><br><br>
 
-            <label for="duration">Tiempo de Duración:</label>
-            <input type="text" id="duration" name="duration"><br><br>
+                <label for="duration">Time Duration:</label>
+                <input type="text" id="duration" name="duration"><br><br>
 
-            <label for="difficulty">Nivel de Dificultad:</label>
-            <select id="difficulty" name="difficulty">
-                <option value="fácil">Fácil</option>
-                <option value="intermedio">Intermedio</option>
-                <option value="difícil">Difícil</option>
-            </select><br><br>
+                <label for="difficulty">Difficulty:</label>
+                <select id="difficulty" name="difficulty">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select><br><br>
 
-            <label for="ingredient">Ingredientes:</label>
-            <input type="text" id="ingredient" name="ingredient"><br><br>
-
-            <input type="button" value="Agregar Ingrediente" onclick="addIngredient()"><br><br>
-
-            <div id="ingredients-list">
-            <!-- Los ingredientes agregados se mostrarán aquí -->
+                <label for="ingredient">Ingredients:</label>
+                <input type="text" id="ingredient" name="ingredient">
+                <h4> List of ingredients:</h4>
             </div>
-
-            <input type="submit" value="Enviar">
+            <div id="ingredients-list">
+                <input type="hidden" id="ingredient-list-input" name="ingredient-list">
+                <!-- Los ingredientes agregados se mostrarán aquí -->
+            </div><br><br>
+            <input class="button1" type="button" value="Add Ingredient" onclick="addIngredient()">
+            <input class="button1" type="button" value="Remove Ingredient" onclick="removeIngredient()">
+            <input class="index" type="text" id="ingredient-index" placeholder="Index"><br><br>
+            <input class="button2" type="submit" value="Send">
             <a href="home">
-                <input type="button" value="Menu">
-            </a>
+                <input class="button2" type="button" value="Menu">
+            </a><br>
+
+            <h4 class="success">{{ message_success }}</h4>
+            <h4 class="error">{{ message_error }}</h4>
+
         </form>
         <script>
-             function addIngredient() {
-                 // Obtener el valor del ingrediente del input
-                 var ingredient = document.getElementById("ingredient").value;
+            var ingredientCount = 0; // Contador de ingredientes
 
-                 // Crear un nuevo elemento div para mostrar el ingrediente
-                 var newIngredient = document.createElement("div");
-                 newIngredient.innerHTML = ingredient;
+            function addIngredient() {
+                // Obtener el valor del ingrediente del input
+                var ingredient = document.getElementById("ingredient").value;
 
-                 // Agregar el nuevo ingrediente a la lista
-                 document.getElementById("ingredients-list").appendChild(newIngredient);
+                // Incrementar el contador de ingredientes
+                ingredientCount++;
 
-                 // Limpiar el valor del input
-                 document.getElementById("ingredient").value = "";
-             }
+                // Crear un nuevo elemento div para mostrar el ingrediente y el índice
+                var newIngredient = document.createElement("div");
+                newIngredient.id = "ingredient-" + ingredientCount;
+                newIngredient.innerHTML = ingredientCount + ": " + ingredient;
+
+                // Agregar el nuevo ingrediente a la lista
+                document.getElementById("ingredients-list").appendChild(newIngredient);
+
+                // Limpiar el valor del input
+                document.getElementById("ingredient").value = "";
+
+                // Obtener la lista de ingredientes actual
+                var ingredientList = document.getElementById("ingredient-list-input").value;
+
+                // Agregar el nuevo ingrediente a la lista
+                if (ingredientList === "") {
+                    ingredientList = ingredient;
+                } else {
+                    ingredientList = ingredientList + "," + ingredient;
+                }
+
+                // Actualizar el valor del campo oculto con la lista de ingredientes
+                document.getElementById("ingredient-list-input").value = ingredientList;
+            }
+
+            function removeIngredient() {
+                // Obtener el índice del ingrediente a eliminar
+                var ingredientIndex = parseInt(document.getElementById("ingredient-index").value);
+
+                // Obtener el elemento del ingrediente a eliminar
+                var ingredientElement = document.getElementById("ingredient-" + ingredientIndex);
+
+                // Verificar si el elemento existe
+                if (ingredientElement) {
+                    // Eliminar el ingrediente de la lista
+                    ingredientElement.parentNode.removeChild(ingredientElement);
+
+                    // Actualizar el contador de ingredientes
+                    ingredientCount--;
+
+                    // Actualizar los índices de los ingredientes restantes
+                    for (var i = ingredientIndex; i <= ingredientCount; i++) {
+                        var currentIngredient = document.getElementById("ingredient-" + (i + 1));
+                        currentIngredient.id = "ingredient-" + i;
+                        currentIngredient.innerHTML = i + ": " + currentIngredient.innerHTML.substring(currentIngredient.innerHTML.indexOf(":") + 2);
+                    }
+
+                    // Actualizar el valor del campo oculto con la lista de ingredientes
+                    var ingredientList = "";
+                    for (var j = 1; j <= ingredientCount; j++) {
+                        var ingredient = document.getElementById("ingredient-" + j).innerHTML.substring(document.getElementById("ingredient-" + j).innerHTML.indexOf(":") + 2);
+                        if (j === 1) {
+                            ingredientList = ingredient;
+                        } else {
+                            ingredientList = ingredientList + "," + ingredient;
+                        }
+                    }
+                    document.getElementById("ingredient-list-input").value = ingredientList;
+                }
+            }
         </script>
+    </div>
 {% endblock %}

@@ -1,12 +1,15 @@
 {% extends "base.html" %}
 {% block title %} Search Recipe {% endblock %}
 {% block content%}
-        <h1> Search recipe </h1>
+<div class="textbox-container">
+        <h2> Search recipe </h2>
         <form method="post" action="{{ url_for('search_recipe') }}">
             {{ render_input("recipe-name", "Recipe name") }}
             {{ render_input("submit", "submit", "Search", "submit") }}
             <a href="home">
                 <input type="button" value="Menu">
-            </a>
+            </a><br><br>
+            <h4 class="error"> {{ message_error }} </h4>
         </form>
+</div>
 {% endblock %}

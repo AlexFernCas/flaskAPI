@@ -1,32 +1,11 @@
-from flask import Flask, render_template, request, session, redirect, url_for, flash, jsonify, g
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
+import jinja2
+from flask import Flask, render_template, request, session, redirect, url_for, g
+from werkzeug.security import  check_password_hash
+from database import init_db, add_user, get_user, get_recipe, add_recipe, modify_recipe, get_allRecipe, get_allUserRecipe
 
-import os
-
-dbDir = "sqlite:///" + os.path.abspath(os.getcwd()) + "/database.db"
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = dbDir
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JSON_SORT_KEYS"] = False
-db = SQLAlchemy(app)
 
-app.app_context().push()
-
-
-class Users (db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(80), nullable=False)
-
-
-class Recipes (db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    duration = db.Column(db.Integer)
-    difficulty = db.Column(db.Integer, nullable=False)
-    ingredients = db.Column(db.String(200), nullable=False)
 
 @app.before_request
 def before_request():
@@ -34,6 +13,10 @@ def before_request():
         g.user = session["username"]
     else:
         g.user = None
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("page_not_found.html"), 404
 
 
 @app.route("/")
@@ -44,22 +27,8 @@ def index():
 @app.route("/signup", methods=["POST", "GET"])
 def signup():
     if request.method == "POST":
-        if Users.query.filter_by(username=request.form["username"]).first():
-            flash("The username already exist", "error")
-            return render_template("signup.html")
-        if len(request.form["username"]) < 5:
-            flash("The username must have 5 characters at last", "error")
-            return render_template("signup.html")
-        if len(request.form["password"]) < 8:
-            flash("The password must have 8 characters at last", "error")
-            return render_template("signup.html")
-
-        hashed_pw = generate_password_hash(request.form["password"], method="sha256")
-        new_user = Users(username=request.form["username"], password=hashed_pw)
-        db.session.add(new_user)
-        db.session.commit()
-        flash("You have been successfully registered.", "success")
-        return redirect(url_for("login"))
+        message_success, message_error = add_user(request.form["username"], request.form["password"])
+        return render_template("login.html", message_success=message_success, message_error=message_error)
 
     return render_template("signup.html")
 
@@ -67,97 +36,95 @@ def signup():
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
-        user = Users.query.filter_by(username=request.form["username"]).first()
+        user = get_user(request.form["username"])
         if user and check_password_hash(user.password, request.form["password"]):
             session["username"] = user.username
             return redirect(url_for("home"))
-        flash("Your credentials are invalid.", "error")
+        return render_template("login.html", message_error="Your credentials are invalid.")
     return render_template("login.html")
 
 
 @app.route("/logout")
 def logout():
-    session.pop(g.user, None)
-    flash(f'{g.user}, you are logged out.', "info")
-    return render_template("login.html")
+    session.pop("username", None)
+    message = f'{g.user}, you are logged out.'
+    return render_template("login.html", message_info=message)
 
 
 @app.route("/home", methods=["POST", "GET"])
 def home():
     if g.user:
-        flash(f'Welcome {g.user}, what do you want to do?', "info")
-        return render_template("home.html")
+        return render_template("home.html", welcome_message=f'Welcome {g.user}, what do you want to do?')
     else:
-        flash("You must log in first.", "error")
-        return render_template("login.html")
-
-
-@app.route("/addRecipe", methods=["POST", "GET"])
-def add_recipe():
-    if request.method == "POST":
-        if Recipes.query.filter_by(name=request.form["recipe-name"]).first():
-            flash("This recipe's name already exists", "error")
-        else:
-            new_recipe = Recipes(name=request.form["recipe-name"], duration=request.form["duration"],
-                                 difficulty=request.form["difficulty"], ingredients=request.form["ingredient"])
-            db.session.add(new_recipe)
-            db.session.commit()
-
-    if g.user:
-        return render_template("addRecipe.html")
-
-    flash("You must log in first.", "error")
-    return render_template("login.html")
+        return render_template("login.html", message_error="You must log in first.")
 
 
 @app.route("/searchRecipe", methods=["POST", "GET"])
 def search_recipe():
     if request.method == "POST":
-        recipe = Recipes.query.filter_by(name=request.form["recipe-name"]).first()
+        recipe = get_recipe(request.form["recipe-name"])
         if recipe:
-            response_recipe =[{
-                "Id": recipe.id,
-                "Name": recipe.name,
-                "Duration": recipe.duration,
-                "Difficulty": recipe.difficulty,
-                "Ingredients": recipe.ingredients
-            }]
-            return jsonify(response_recipe)
+            return render_template("showRecipe.html", recipe=recipe)
         else:
-            flash("Recipe not found.", "error")
-
+            return render_template("searchRecipe.html", message_error="Recipe not found")
     if g.user:
         return render_template("searchRecipe.html")
 
-    flash("You must log in first.", "error")
-    return render_template("login.html")
+    return render_template("login.html", message_error="You must log in first.")
+
+@app.route("/showOwnRecipes", methods=["GET"])
+def search_ownRecipes():
+    recipe = get_allUserRecipe(g.user)
+
+    return render_template("showAllRecipes.html", recipe=recipe)
+
+
+@app.route("/showAllRecipes", methods=["GET"])
+def search_allRecipes():
+    recipe = get_allRecipe()
+
+    return render_template("showAllRecipes.html", recipe=recipe)
+
+@app.route("/addRecipe", methods=["POST", "GET"])
+def create_recipe():
+    if request.method == "POST":
+        message_success, message_error = add_recipe(request.form["recipe-name"],
+                                                    request.form["duration"],
+                                                    request.form["difficulty"],
+                                                    request.form["ingredient-list"],
+                                                    g.user)
+        return render_template("addRecipe.html", message_success=message_success, message_error=message_error)
+
+    if g.user:
+        return render_template("addRecipe.html")
+    return render_template("login.html", message_error="You must log in first.")
 
 
 @app.route("/modifyRecipe", methods=["POST", "GET"])
-def modify_recipe():
+def update_recipe():
     if request.method == "POST":
-        recipe = Recipes.query.filter_by(name=request.form["recipe-name"]).first()
+        recipe = get_recipe(request.form["recipe-name"])
+        if recipe.user != g.user:
+            return render_template("login.html", message_error="You can not modify the recipe that other user owns.")
         if recipe:
-            recipe.name = request.form["recipe-name"]
-            recipe.duration = request.form["duration"]
-            recipe.difficulty = request.form["difficulty"]
-            recipe.ingredients = request.form["ingredient"]
-            flash("Recipe has been successfully modified.")
-            db.session.commit()
-            return render_template("modifyRecipe.html")
+            message_success, message_error = modify_recipe (request.form["recipe-name"],
+                                                            request.form["duration"],
+                                                            request.form["difficulty"],
+                                                            request.form["ingredient"])
+            return render_template("modifyRecipe.html", message_success=message_success, message_error=message_error)
         else:
-            flash("Recipe not found.", "error")
+            return render_template("modifyRecipe.html", message_error="Recipe not found.")
 
     if g.user:
         return render_template("modifyRecipe.html")
 
-    flash("You must log in first.", "error")
-    return render_template("login.html")
+    return render_template("login.html", message_error="You must log in first.")
 
-
-app.secret_key = "12345"
 
 
 if __name__ == "__main__":
-    db.create_all()
+    app.secret_key = "12345"
+    app.config["JSON_SORT_KEYS"] = False
+    db = init_db(app)
     app.run(debug=True)
+    app.app_context().push()
